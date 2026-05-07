@@ -37,6 +37,8 @@ jobs:
 
       - name: Run JML pipeline
         run: python main.py
+        env:
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
 
       - name: Commit updated snapshot
         run: |
