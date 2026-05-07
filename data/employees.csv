@@ -1,0 +1,11 @@
+employee_id,name,email,department,role,status,manager_email,start_date
+E001,Sarah Mitchell,sarah.mitchell@company.com,Engineering,Senior Software Engineer,active,james.okafor@company.com,2021-03-15
+E002,James Okafor,james.okafor@company.com,Engineering,Engineering Manager,active,linda.chen@company.com,2019-07-01
+E003,Priya Nair,priya.nair@company.com,HR,HR Business Partner,active,marcus.wells@company.com,2022-01-10
+E004,Daniel Torres,daniel.torres@company.com,Sales,Account Executive,terminated,rachel.kim@company.com,2020-05-20
+E005,Linda Chen,linda.chen@company.com,Engineering,VP of Engineering,active,,2017-11-03
+E006,Rachel Kim,rachel.kim@company.com,Sales,Sales Manager,mover,marcus.wells@company.com,2018-09-14
+E007,Marcus Wells,marcus.wells@company.com,Operations,COO,active,,2016-04-22
+E008,Aisha Okonkwo,aisha.okonkwo@company.com,Finance,Financial Analyst,terminated,marcus.wells@company.com,2021-06-07
+E009,Tom Bergmann,tom.bergmann@company.com,Marketing,Marketing Specialist,active,rachel.kim@company.com,2023-02-28
+E010,Yuki Tanaka,yuki.tanaka@company.com,Engineering,Software Engineer,mover,james.okafor@company.com,2022-08-16
