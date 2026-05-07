@@ -1,46 +1,52 @@
-GRAPH_API_BASE = "https://graph.microsoft.com/v1.0"
-TEAMS_WEBHOOK_URL = "https://placeholder.webhook.office.com/webhookb2/placeholder"
+import os
+
+import requests
+from googleapiclient.errors import HttpError
+
+from auth import DOMAIN, get_directory_service
+
+TEAMS_WEBHOOK_URL = os.environ.get(
+    "TEAMS_WEBHOOK_URL",
+    "https://placeholder.webhook.office.com/webhookb2/placeholder",
+)
 
 
-def _get_user_object_id(employee: dict) -> str:
-    """GET /users/{email} — resolve email to Entra object ID."""
-    print(f"    [API] GET {GRAPH_API_BASE}/users/{employee['email']}")
-    return "placeholder-object-id"
+def handle_leaver(employee: dict) -> None:
+    print(f"  [LEAVER] Offboarding {employee['name']} ({employee['employee_id']})")
 
+    service = get_directory_service()
 
-def _disable_account(object_id: str, employee: dict) -> None:
-    """PATCH /users/{id} — block sign-in immediately."""
-    print(f"    [API] PATCH {GRAPH_API_BASE}/users/{object_id}")
-    print(f"           accountEnabled=false")
+    service.users().patch(
+        userKey=employee["email"],
+        body={"suspended": True},
+    ).execute()
+    print(f"    Suspended account: {employee['email']}")
 
+    current_groups = (
+        service.groups()
+        .list(userKey=employee["email"], domain=DOMAIN)
+        .execute()
+        .get("groups", [])
+    )
 
-def _revoke_sessions(object_id: str, employee: dict) -> None:
-    """POST /users/{id}/revokeSignInSessions — invalidate all active tokens."""
-    print(f"    [API] POST {GRAPH_API_BASE}/users/{object_id}/revokeSignInSessions")
+    for group in current_groups:
+        try:
+            service.members().delete(
+                groupKey=group["email"], memberKey=employee["email"]
+            ).execute()
+            print(f"    Removed from group: {group['email']}")
+        except HttpError as e:
+            if e.resp.status != 404:
+                raise
 
+    _notify_manager_via_teams(employee)
 
-def _remove_all_groups(object_id: str, employee: dict) -> None:
-    """Remove user from all Entra group memberships."""
-    print(f"    [API] GET {GRAPH_API_BASE}/users/{object_id}/memberOf (fetch all groups)")
-    print(f"    [API] DELETE {GRAPH_API_BASE}/groups/*/members/{object_id}/$ref (for each group)")
-
-
-def _remove_licenses(object_id: str, employee: dict) -> None:
-    """POST /users/{id}/assignLicense — remove all assigned licenses."""
-    print(f"    [API] POST {GRAPH_API_BASE}/users/{object_id}/assignLicense")
-    print(f"           addLicenses=[], removeLicenses=[placeholder-sku-ids]")
-
-
-def _hide_from_gal(object_id: str, employee: dict) -> None:
-    """PATCH /users/{id} — hide the account from the Global Address List."""
-    print(f"    [API] PATCH {GRAPH_API_BASE}/users/{object_id}")
-    print(f"           showInAddressList=false")
+    print(f"  Done — {employee['email']} fully offboarded\n")
 
 
 def _notify_manager_via_teams(employee: dict) -> None:
-    """POST to Teams incoming webhook — alert the manager about the offboarding."""
     if not employee.get("manager_email"):
-        print(f"    [TEAMS] No manager on record — skipping notification")
+        print("    [TEAMS] No manager on record — skipping notification")
         return
 
     payload = {
@@ -69,7 +75,7 @@ def _notify_manager_via_teams(employee: dict) -> None:
                         },
                         {
                             "type": "TextBlock",
-                            "text": "The account has been disabled and all sessions revoked. Please ensure asset retrieval and access handover are completed.",
+                            "text": "The account has been suspended and all group memberships removed. Please arrange asset retrieval and access handover.",
                             "wrap": True,
                         },
                     ],
@@ -78,20 +84,6 @@ def _notify_manager_via_teams(employee: dict) -> None:
         ],
     }
 
-    print(f"    [TEAMS] POST {TEAMS_WEBHOOK_URL}")
-    print(f"            Notifying manager: {employee['manager_email']}")
-    print(f"            Payload: Adaptive Card for {employee['name']}")
-
-
-def handle_leaver(employee: dict) -> None:
-    print(f"  [LEAVER] Offboarding {employee['name']} ({employee['employee_id']})")
-
-    object_id = _get_user_object_id(employee)
-    _disable_account(object_id, employee)
-    _revoke_sessions(object_id, employee)
-    _remove_all_groups(object_id, employee)
-    _remove_licenses(object_id, employee)
-    _hide_from_gal(object_id, employee)
-    _notify_manager_via_teams(employee)
-
-    print(f"  Done — {employee['email']} fully offboarded\n")
+    response = requests.post(TEAMS_WEBHOOK_URL, json=payload, timeout=10)
+    response.raise_for_status()
+    print(f"    [TEAMS] Notified manager: {employee['manager_email']}")
