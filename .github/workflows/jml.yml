@@ -10,9 +10,20 @@ jobs:
     name: Run JML Pipeline
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -26,11 +37,6 @@ jobs:
 
       - name: Run JML pipeline
         run: python main.py
-        env:
-          GRAPH_CLIENT_ID: ${{ secrets.GRAPH_CLIENT_ID }}
-          GRAPH_CLIENT_SECRET: ${{ secrets.GRAPH_CLIENT_SECRET }}
-          GRAPH_TENANT_ID: ${{ secrets.GRAPH_TENANT_ID }}
-          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
       - name: Commit updated snapshot
         run: |
