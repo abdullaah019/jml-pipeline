@@ -1,4 +1,7 @@
-import google.auth
+import json
+import os
+
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 DOMAIN = "yaseenconsulting.com"
@@ -10,5 +13,10 @@ SCOPES = [
 
 
 def get_directory_service():
-    creds, _ = google.auth.default(scopes=SCOPES)
+    key_json = os.environ.get("GCP_SA_KEY")
+    if not key_json:
+        raise ValueError("GCP_SA_KEY environment variable is not set")
+    creds = service_account.Credentials.from_service_account_info(
+        json.loads(key_json), scopes=SCOPES
+    )
     return build("admin", "directory_v1", credentials=creds, cache_discovery=False)

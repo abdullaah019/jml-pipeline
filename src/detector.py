@@ -2,8 +2,19 @@ import json
 import os
 from pathlib import Path
 
-from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from googleapiclient.discovery import build
+
+_SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+
+def _sa_credentials(scopes: list) -> service_account.Credentials:
+    key_json = os.environ.get("GCP_SA_KEY")
+    if not key_json:
+        raise ValueError("GCP_SA_KEY environment variable is not set")
+    return service_account.Credentials.from_service_account_info(
+        json.loads(key_json), scopes=scopes
+    )
 
 
 def load_google_sheet() -> dict:
@@ -11,12 +22,7 @@ def load_google_sheet() -> dict:
     if not sheet_id:
         raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
 
-    access_token = os.environ.get("GOOGLE_ACCESS_TOKEN")
-    if not access_token:
-        raise ValueError("GOOGLE_ACCESS_TOKEN environment variable is not set")
-
-    creds = Credentials(token=access_token)
-    service = build("sheets", "v4", credentials=creds, cache_discovery=False)
+    service = build("sheets", "v4", credentials=_sa_credentials(_SHEET_SCOPES), cache_discovery=False)
     result = (
         service.spreadsheets()
         .values()
