@@ -4,6 +4,7 @@ from pathlib import Path
 
 import gspread
 import google.auth
+import google.auth.transport.requests
 
 _SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
@@ -14,6 +15,7 @@ def load_google_sheet() -> dict:
         raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
 
     creds, _ = google.auth.default(scopes=_SHEET_SCOPES)
+    creds.refresh(google.auth.transport.requests.Request())
     client = gspread.authorize(creds)
     sheet = client.open_by_key(sheet_id).sheet1
     rows = sheet.get_all_records()
