@@ -3,23 +3,9 @@ import os
 from pathlib import Path
 
 import gspread
-from google.auth import default as google_auth_default
-from google.oauth2 import service_account
+import google.auth
 
 _SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-
-def _get_sheet_credentials():
-    creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
-    if creds_path and os.path.exists(creds_path):
-        with open(creds_path) as f:
-            info = json.load(f)
-        if info.get("type") == "service_account":
-            return service_account.Credentials.from_service_account_info(
-                info, scopes=_SHEET_SCOPES
-            )
-    creds, _ = google_auth_default(scopes=_SHEET_SCOPES)
-    return creds
 
 
 def load_google_sheet() -> dict:
@@ -27,7 +13,7 @@ def load_google_sheet() -> dict:
     if not sheet_id:
         raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
 
-    creds = _get_sheet_credentials()
+    creds, _ = google.auth.default(scopes=_SHEET_SCOPES)
     client = gspread.authorize(creds)
     sheet = client.open_by_key(sheet_id).sheet1
     rows = sheet.get_all_records()

@@ -1,6 +1,6 @@
 import secrets
 
-from auth import DOMAIN, ADMIN_EMAIL, get_directory_service
+from auth import DOMAIN, get_directory_service
 
 
 def _department_group(department: str) -> str:
