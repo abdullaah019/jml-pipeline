@@ -38,10 +38,6 @@ jobs:
           pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Debug credentials
-        run: |
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
-          cat "$GOOGLE_APPLICATION_CREDENTIALS" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('type'), d.get('service_account_impersonation_url', 'NO SA IMPERSONATION'))"
 
       - name: Run JML pipeline
         run: python main.py
