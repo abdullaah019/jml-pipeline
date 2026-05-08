@@ -11,6 +11,13 @@ def handle_mover(employee: dict) -> None:
     print(f"  [MOVER] Updating {employee['name']} ({employee['employee_id']})")
 
     service = get_directory_service()
+    new_group = _department_group(employee["department"])
+
+    if service is None:
+        print(f"    [DRY RUN] Would update profile: role={employee['role']}, dept={employee['department']}")
+        print(f"    [DRY RUN] Would update group membership to: {new_group}")
+        print(f"  Done — skipped (GCP_SA_KEY not set)\n")
+        return
 
     patch_body = {
         "orgUnitPath": f"/{employee['department']}",
@@ -30,8 +37,6 @@ def handle_mover(employee: dict) -> None:
 
     service.users().patch(userKey=employee["email"], body=patch_body).execute()
     print(f"    Updated profile: role={employee['role']}, dept={employee['department']}")
-
-    new_group = _department_group(employee["department"])
 
     current_groups = (
         service.groups()

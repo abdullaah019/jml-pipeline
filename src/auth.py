@@ -15,7 +15,7 @@ SCOPES = [
 def get_directory_service():
     key_json = os.environ.get("GCP_SA_KEY")
     if not key_json:
-        raise ValueError("GCP_SA_KEY environment variable is not set")
+        return None
     creds = service_account.Credentials.from_service_account_info(
         json.loads(key_json), scopes=SCOPES
     )

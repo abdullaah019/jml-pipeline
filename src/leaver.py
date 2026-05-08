@@ -16,6 +16,13 @@ def handle_leaver(employee: dict) -> None:
 
     service = get_directory_service()
 
+    if service is None:
+        print(f"    [DRY RUN] Would suspend account: {employee['email']}")
+        print(f"    [DRY RUN] Would remove all group memberships")
+        print(f"    [DRY RUN] Would notify manager: {employee.get('manager_email', 'none')}")
+        print(f"  Done — skipped (GCP_SA_KEY not set)\n")
+        return
+
     service.users().patch(
         userKey=employee["email"],
         body={"suspended": True},

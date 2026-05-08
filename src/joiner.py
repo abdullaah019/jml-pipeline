@@ -11,6 +11,13 @@ def handle_joiner(employee: dict) -> None:
     print(f"  [JOINER] Provisioning {employee['name']} ({employee['employee_id']})")
 
     service = get_directory_service()
+    group_email = _department_group(employee["department"])
+
+    if service is None:
+        print(f"    [DRY RUN] Would create account: {employee['email']}")
+        print(f"    [DRY RUN] Would add to group: {group_email}")
+        print(f"  Done — skipped (GCP_SA_KEY not set)\n")
+        return
 
     first, _, last = employee["name"].partition(" ")
 
@@ -37,7 +44,6 @@ def handle_joiner(employee: dict) -> None:
     service.users().insert(body=user_body).execute()
     print(f"    Created Google Workspace account: {employee['email']}")
 
-    group_email = _department_group(employee["department"])
     service.members().insert(
         groupKey=group_email,
         body={"email": employee["email"], "role": "MEMBER"},
