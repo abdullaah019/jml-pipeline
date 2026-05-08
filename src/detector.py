@@ -15,8 +15,8 @@ def load_google_sheet() -> dict:
         raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
 
     creds, _ = google.auth.default(scopes=_SHEET_SCOPES)
-    creds.refresh(google.auth.transport.requests.Request())
-    client = gspread.authorize(creds)
+    client = gspread.Client(auth=creds)
+    client.session = google.auth.transport.requests.AuthorizedSession(creds)
     sheet = client.open_by_key(sheet_id).sheet1
     rows = sheet.get_all_records()
 
