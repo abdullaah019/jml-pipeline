@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from detector import detect_changes, load_csv, load_snapshot
+from detector import detect_changes, load_google_sheet, load_snapshot
 from joiner import handle_joiner
 from leaver import handle_leaver
 from mover import handle_mover
@@ -16,7 +16,6 @@ HANDLERS = {
     "leaver": handle_leaver,
 }
 
-DATA_PATH = Path(__file__).parent / "data" / "employees.csv"
 SNAPSHOT_PATH = Path(__file__).parent / "state" / "snapshot.json"
 
 
@@ -32,7 +31,7 @@ def save_snapshot(employees: dict) -> None:
 def main() -> None:
     print("=== JML Pipeline ===\n")
 
-    current = load_csv(DATA_PATH)
+    current = load_google_sheet()
     previous = load_snapshot(SNAPSHOT_PATH)
 
     changes = detect_changes(current, previous)

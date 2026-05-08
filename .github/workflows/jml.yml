@@ -39,6 +39,7 @@ jobs:
         run: python main.py
         env:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
 
       - name: Commit updated snapshot
         run: |

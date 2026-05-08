@@ -1,14 +1,38 @@
-import csv
 import json
+import os
 from pathlib import Path
 
+import gspread
+from google.auth import default as google_auth_default
+from google.oauth2 import service_account
 
-def load_csv(path: str) -> dict:
-    employees = {}
-    with open(path, newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            employees[row["employee_id"]] = row
-    return employees
+_SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+
+
+def _get_sheet_credentials():
+    creds_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+    if creds_path and os.path.exists(creds_path):
+        with open(creds_path) as f:
+            info = json.load(f)
+        if info.get("type") == "service_account":
+            return service_account.Credentials.from_service_account_info(
+                info, scopes=_SHEET_SCOPES
+            )
+    creds, _ = google_auth_default(scopes=_SHEET_SCOPES)
+    return creds
+
+
+def load_google_sheet() -> dict:
+    sheet_id = os.environ.get("GOOGLE_SHEET_ID")
+    if not sheet_id:
+        raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
+
+    creds = _get_sheet_credentials()
+    client = gspread.authorize(creds)
+    sheet = client.open_by_key(sheet_id).sheet1
+    rows = sheet.get_all_records()
+
+    return {row["employee_id"]: {k: str(v) for k, v in row.items()} for row in rows}
 
 
 def load_snapshot(path: str) -> dict:
@@ -45,7 +69,7 @@ def detect_changes(current: dict, previous: dict) -> list:
 
 def main():
     root = Path(__file__).parent.parent
-    current = load_csv(root / "data" / "employees.csv")
+    current = load_google_sheet()
     previous = load_snapshot(root / "state" / "snapshot.json")
 
     changes = detect_changes(current, previous)
