@@ -31,7 +31,6 @@ jobs:
         run: python main.py
         env:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
       - name: Commit updated snapshot
         run: |

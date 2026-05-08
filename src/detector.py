@@ -1,20 +1,10 @@
+import csv
+import io
 import json
 import os
 from pathlib import Path
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-
-_SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-
-def _sa_credentials(scopes: list) -> service_account.Credentials:
-    key_json = os.environ.get("GCP_SA_KEY")
-    if not key_json:
-        raise ValueError("GCP_SA_KEY environment variable is not set")
-    return service_account.Credentials.from_service_account_info(
-        json.loads(key_json), scopes=scopes
-    )
+import requests
 
 
 def load_google_sheet() -> dict:
@@ -22,19 +12,16 @@ def load_google_sheet() -> dict:
     if not sheet_id:
         raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
 
-    service = build("sheets", "v4", credentials=_sa_credentials(_SHEET_SCOPES), cache_discovery=False)
-    result = (
-        service.spreadsheets()
-        .values()
-        .get(spreadsheetId=sheet_id, range="Sheet1")
-        .execute()
-    )
-    values = result.get("values", [])
-    if not values:
-        return {}
-    headers = values[0]
-    rows = [dict(zip(headers, row + [""] * (len(headers) - len(row)))) for row in values[1:]]
-    return {row["employee_id"]: {k: str(v) for k, v in row.items()} for row in rows if row.get("employee_id")}
+    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv"
+    response = requests.get(url, timeout=30)
+    response.raise_for_status()
+
+    reader = csv.DictReader(io.StringIO(response.text))
+    return {
+        row["employee_id"]: {k: str(v) for k, v in row.items()}
+        for row in reader
+        if row.get("employee_id")
+    }
 
 
 def load_snapshot(path: str) -> dict:
