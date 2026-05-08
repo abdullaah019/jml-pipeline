@@ -1,5 +1,5 @@
 {
-  "run_timestamp": "2026-05-08T20:43:55Z",
+  "run_timestamp": "2026-05-08T20:52:41Z",
   "employees": {
     "E001": {
       "employee_id": "E001",
@@ -7,20 +7,9 @@
       "email": "sarah.mitchell@yaseenconsuling.com",
       "department": "Engineering",
       "role": "Senior Software Engineer",
-      "status": "terminated",
+      "status": "active",
       "manager_email": "james.okafor@company.com",
       "start_date": "2021-03-15",
-      "": ""
-    },
-    "E002": {
-      "employee_id": "E002",
-      "name": "",
-      "email": "",
-      "department": "",
-      "role": "",
-      "status": "",
-      "manager_email": "",
-      "start_date": "",
       "": ""
     }
   }
