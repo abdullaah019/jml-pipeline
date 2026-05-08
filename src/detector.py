@@ -2,8 +2,8 @@ import json
 import os
 from pathlib import Path
 
-import gspread
-import gspread.auth
+import google.auth
+from googleapiclient.discovery import build
 
 _SHEET_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
@@ -13,11 +13,20 @@ def load_google_sheet() -> dict:
     if not sheet_id:
         raise ValueError("GOOGLE_SHEET_ID environment variable is not set")
 
-    client = gspread.auth.default(scopes=_SHEET_SCOPES)
-    sheet = client.open_by_key(sheet_id).sheet1
-    rows = sheet.get_all_records()
-
-    return {row["employee_id"]: {k: str(v) for k, v in row.items()} for row in rows}
+    creds, _ = google.auth.default(scopes=_SHEET_SCOPES)
+    service = build("sheets", "v4", credentials=creds, cache_discovery=False)
+    result = (
+        service.spreadsheets()
+        .values()
+        .get(spreadsheetId=sheet_id, range="Sheet1")
+        .execute()
+    )
+    values = result.get("values", [])
+    if not values:
+        return {}
+    headers = values[0]
+    rows = [dict(zip(headers, row + [""] * (len(headers) - len(row)))) for row in values[1:]]
+    return {row["employee_id"]: {k: str(v) for k, v in row.items()} for row in rows if row.get("employee_id")}
 
 
 def load_snapshot(path: str) -> dict:
