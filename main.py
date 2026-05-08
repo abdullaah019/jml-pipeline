@@ -1,5 +1,6 @@
 import json
 import sys
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,4 +49,10 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exc:
+        print("\n=== PIPELINE ERROR ===", flush=True)
+        traceback.print_exc()
+        print(f"\n{type(exc).__name__}: {exc}", flush=True)
+        sys.exit(1)
