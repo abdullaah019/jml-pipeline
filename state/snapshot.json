@@ -1,5 +1,5 @@
 {
-  "run_timestamp": "2026-05-09T01:28:00Z",
+  "run_timestamp": "2026-05-09T04:42:02Z",
   "employees": {
     "E001": {
       "employee_id": "E001",
@@ -10,6 +10,17 @@
       "status": "active",
       "manager_email": "james.okafor@company.com",
       "start_date": "2021-03-15",
+      "": ""
+    },
+    "E002": {
+      "employee_id": "E002",
+      "name": "Test User",
+      "email": "test.user@yaseenconsulting.com",
+      "department": "Engineering",
+      "role": "Software Engineer",
+      "status": "active",
+      "manager_email": "abdullaah@yaseenconsulting.com",
+      "start_date": "2026-05-08",
       "": ""
     }
   }
