@@ -2,7 +2,7 @@
 
 An automated **Joiner-Mover-Leaver (JML)** pipeline that reads live HR data from Google Sheets, detects employee changes, and automatically provisions or deprovisions Google Workspace accounts. Runs every night at midnight via GitHub Actions with zero manual intervention.
 
-> 📸 **[Screenshot: GitHub Actions showing scheduled run]**
+![GitHub Actions runs](https://github.com/user-attachments/assets/1cced157-a863-4c8d-9b21-e9ca2f782a74)
 
 ---
 
@@ -32,7 +32,7 @@ Google Apps Script Webhook
 Google Workspace Admin SDK (provisions/deprovisions users)
 ```
 
-> 📸 **[Screenshot: Architecture diagram or pipeline logs showing end-to-end flow]**
+![Pipeline logs](https://github.com/user-attachments/assets/c13c590b-4b81-4e1b-9744-cbdf732038a8)
 
 ---
 
@@ -114,7 +114,7 @@ E002 | Jane Doe | jane.doe@yourcompany.com | HR | HR Manager | active | ceo@your
 
 5. Click **Share** → **Change to anyone with the link** → **Viewer** → **Done**
 
-> 📸 **[Screenshot: Google Sheet with employee data]**
+![Google Sheet HR data](https://github.com/user-attachments/assets/50fbbe2a-b814-437f-9113-9ecf8987b452)
 
 6. Copy your Sheet ID from the URL:
 ```
@@ -141,7 +141,7 @@ For each group:
 - **Access type:** Restricted
 - **Who can join:** Only invited users
 
-> 📸 **[Screenshot: Google Workspace Groups list]**
+![Google Workspace Groups](https://github.com/user-attachments/assets/41d2a5a7-60a3-4714-ac59-e1a70053ebbd)
 
 ---
 
@@ -224,7 +224,7 @@ function addToGroup(email, department) {
 7. Click **Deploy** → **Authorize access** → follow prompts
 8. Copy the **Web app URL** — you'll need this as a GitHub secret
 
-> 📸 **[Screenshot: Apps Script execution log showing doPost Completed]**
+![Apps Script execution log](https://github.com/user-attachments/assets/5b1e2810-b763-4706-b568-edfe2e04a5d2)
 
 ---
 
@@ -251,8 +251,6 @@ Add these secrets:
 |---|---|
 | `GOOGLE_SHEET_ID` | Your Sheet ID from Step 3 |
 | `APPS_SCRIPT_WEBHOOK_URL` | Your webhook URL from Step 5 |
-
-> 📸 **[Screenshot: GitHub Actions secrets page (values hidden)]**
 
 ---
 
@@ -319,7 +317,7 @@ jobs:
 
 ## How It Works
 
-### The CSV / Google Sheet
+### The Google Sheet
 
 The Google Sheet is the source of truth. Each row is an employee. The `status` column drives everything:
 
@@ -402,11 +400,11 @@ Each handler sends a POST request to the Apps Script webhook:
 
 ### Trigger a Manual Run
 
+![GitHub Actions workflow runs](https://github.com/user-attachments/assets/f75078b6-f375-46c8-a144-77f50e2132cb)
+
 1. Go to your GitHub repo → **Actions** tab
 2. Click **JML Pipeline** in the left sidebar
 3. Click **Run workflow** → green **Run workflow** button
-
-> 📸 **[Screenshot: GitHub Actions showing successful runs including a scheduled run]**
 
 ---
 
@@ -458,4 +456,4 @@ Free, serverless, and the cron scheduling is built in. The entire infrastructure
 
 ## License
 
-MIT<img width="1571" height="791" alt="F2" src="https://github.com/user-attachments/assets/41d2a5a7-60a3-4714-ac59-e1a70053ebbd" />
+MIT
